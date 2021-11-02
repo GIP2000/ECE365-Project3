@@ -4,6 +4,7 @@
 #include <sstream>
 #include "./heap.h"
 #include "./graph.h"
+#include <chrono>
 
 using namespace std;
 
@@ -104,9 +105,6 @@ string getPath(const string& start, const string& current, heap& kh){
     
     if(current == start) return "[" + start;
     return getPath(start,pname,kh) + ", " + current; 
-
-    
-    
 }
 
 void writeToOutput(const string& filename, const string& startNode, graph& g, heap& kh){
@@ -125,8 +123,9 @@ void writeToOutput(const string& filename, const string& startNode, graph& g, he
     outstream.close(); 
 }
 
-
 int main(){
+
+    // make graph
     cout << "Enter name of graph file: "; 
     string graphFile;
     cin >> graphFile;
@@ -134,7 +133,15 @@ int main(){
     cout << "Enter name of starting vertex: "; 
     string startNode; 
     cin >> startNode; 
+
+    // Apply Dijkstra's algorithm
+    auto start = chrono::_V2::steady_clock::now();
     heap kheap = Dijkstra(g,startNode); 
+    auto end = chrono::_V2::steady_clock::now();
+    chrono::duration<double> duration = end-start; 
+    cout << "Total time (in seconds) to apply Dijkstra's algorithm: " << duration.count() << endl;
+
+    // Write to output file
     cout << "Enter name of output file: "; 
     string outfile; 
     cin >> outfile;
