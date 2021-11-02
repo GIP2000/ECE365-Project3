@@ -16,7 +16,7 @@ hash.o: hash.cpp hash.h
 	g++ -c hash.cpp
 
 debug:
-	g++ -g -o useDikstras.out useDikstras.cpp hash.cpp heap.cpp
+	g++ -g -o useDikstras.out useDikstras.cpp hash.cpp heap.cpp graph.cpp
 
 clean:
 	rm -f *.out *.o *.stackdump *~

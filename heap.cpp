@@ -71,13 +71,13 @@ int heap::setKey(const std::string &id, int key){
 
 
 }
-int heap::deleteMin(std::string *pId, int *pKey , void *ppData ){
+int heap::deleteMin(std::string *pId, int *pKey , void **ppData ){
     if(this->lastIndex == 0) return 1; 
 
     heapItem min = this->data[1]; 
     if(pId != nullptr) *pId = min.id; 
     if(pKey != nullptr) *pKey = min.key;
-    if(ppData != nullptr) ppData = min.pv;
+    if(ppData != nullptr) *ppData = min.pv;
     this->hashmap.remove(min.id); 
 
     heapItem bot = this->data[this->lastIndex]; 
@@ -137,4 +137,24 @@ int heap::checkIfValid(int index, int key){
     // if the right child index is valid and the key is less than the right child
     if((index*2 + 1) <= this->lastIndex && key > rightChild) return 3;
     return 0; 
+}
+
+
+int heap::getKey(const string& id, bool * found){
+    heapItem* item = ((heapItem*)this->hashmap.getPointer(id,found));
+    if(!(*found)) return -1;
+    return item->key;
+     
+}
+
+void heap::setPointer(const string& id, void * pv){
+    bool found = false; 
+    heapItem* item = (heapItem*)this->hashmap.getPointer(id,&found);
+    if(!found) return;
+    item->pv = pv; 
+}
+
+void * heap::getPointer(const string& id, bool * found){
+    heapItem* item = (heapItem*)this->hashmap.getPointer(id,found);
+    return item == nullptr ? nullptr : item->pv; 
 }
