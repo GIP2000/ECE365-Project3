@@ -113,12 +113,12 @@ int heap::deleteMin(std::string *pId, int *pKey , void **ppData ){
     
 
 }
-int heap::remove(const std::string &id, int *pKey, void *ppData){\
+int heap::remove(const std::string &id, int *pKey, void **ppData){
     bool found = false; 
     heapItem* item = (heapItem*)this->hashmap.getPointer(id,&found);
     if(!found) return 1;
     if(pKey != nullptr) *pKey = item->key; 
-    if(ppData != nullptr) ppData = item->pv; 
+    if(ppData != nullptr) *ppData = item->pv; 
     this->setKey(id,this->data[1].key-1); 
     return this->deleteMin(nullptr);  
 }
