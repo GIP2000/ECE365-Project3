@@ -10,12 +10,14 @@ using namespace std;
 
 class DijkstraHelper {
     public:
-        DijkstraHelper(graph::vertex* self = nullptr,graph::vertex* path = nullptr){
+        DijkstraHelper(graph::vertex* self = nullptr,graph::vertex* path = nullptr, int weight = INT_MAX){
             this -> self = self;
             this -> path = path;
+            this -> weight = weight; 
         }
         graph::vertex* self = {nullptr};
         graph::vertex* path = {nullptr};
+        int weight = {INT_MAX}; 
 };
 
 
@@ -57,29 +59,32 @@ graph generateGraph(const string& filename){
     return g; 
 }
 
-heap Dijkstra(graph& g, const string& start){
+hashTable Dijkstra(graph& g, const string& start){
     heap dheap(g.getSize());
-    heap kheap(g.getSize());
+    hashTable ktable(g.getSize()); 
     for(auto& v: g.verts){
         DijkstraHelper* dh = new DijkstraHelper(&v);
         dheap.insert(v.name,v.name == start ? 0 : INT_MAX,dh);
     }
-    string name;
+    
+    string vName;
     int dv;
     DijkstraHelper* dhp;
-    while(dheap.deleteMin(&name,&dv,(void**)&dhp) != 1){
-        kheap.insert(name,dv,dhp);
+    while(dheap.deleteMin(&vName,&dv,(void**)&dhp) != 1){
+        dhp->weight = dv; 
+        ktable.insert(vName,dhp); 
         for(auto e: dhp->self->edges){
             int cvw = get<1>(e);
             graph::vertex* w = get<0>(e); 
             bool found;  
             int dw = dheap.getKey(w->name,&found);
             if(!found){
-                dw = kheap.getKey(w->name,&found);
+                DijkstraHelper* tdhp = (DijkstraHelper*)ktable.getPointer(w->name,&found); 
                 if(!found) {
                     cerr << "Unreachable\n";
                     exit(-1); 
                 }
+                dw = tdhp->weight; 
             }
             if(dv + cvw < dw){
                 dheap.setKey(w->name,dv + cvw);
@@ -89,12 +94,12 @@ heap Dijkstra(graph& g, const string& start){
         }
 
     }
-    return kheap; 
+    return ktable; 
     
     
 }
 
-string getPath(const string& start, const string& current, heap& kh){
+string getPath(const string& start, const string& current, hashTable& kh){
     bool found; 
     DijkstraHelper* dh = (DijkstraHelper*)kh.getPointer(current,&found); 
     if(!found){
@@ -107,15 +112,17 @@ string getPath(const string& start, const string& current, heap& kh){
     return getPath(start,pname,kh) + ", " + current; 
 }
 
-void writeToOutput(const string& filename, const string& startNode, graph& g, heap& kh){
+void writeToOutput(const string& filename, const string& startNode, graph& g, hashTable& kh){
     ofstream outstream(filename);
     for(auto& v: g.verts){
         bool found; 
-        int distance = kh.getKey(v.name,&found);
+        // int distance = kh.getKey(v.name,&found);
+        DijkstraHelper* dhp = (DijkstraHelper*)kh.getPointer(v.name,&found); 
         if(!found){
             cerr << "Unreachable \n";
             exit(-1);
         }
+        int distance = dhp->weight; 
 
         string fs = getPath(startNode,v.name,kh) + "]"; 
         outstream << v.name << ": " << distance << " " << fs << "\n"; 
@@ -136,7 +143,9 @@ int main(){
 
     // Apply Dijkstra's algorithm
     auto start = chrono::_V2::steady_clock::now();
-    heap kheap = Dijkstra(g,startNode); 
+    hashTable ktable = Dijkstra(g,startNode); 
+    DijkstraHelper* dhp = (DijkstraHelper*)ktable.getPointer("v3"); 
+    cout << "self: "<< dhp->self->name << " path: " << dhp->path->name << " d: " << dhp->weight << "\n"; 
     auto end = chrono::_V2::steady_clock::now();
     chrono::duration<double> duration = end-start; 
     cout << "Total time (in seconds) to apply Dijkstra's algorithm: " << duration.count() << endl;
@@ -145,7 +154,7 @@ int main(){
     cout << "Enter name of output file: "; 
     string outfile; 
     cin >> outfile;
-    writeToOutput(outfile,startNode,g,kheap); 
+    writeToOutput(outfile,startNode,g,ktable); 
 
     return 0; 
 }

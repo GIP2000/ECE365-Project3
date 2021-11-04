@@ -67,7 +67,7 @@ class heap{
   //   0 on success
   //   1 if a node with the given id does not exist
   //
-  int remove(const std::string &id, int *pKey = nullptr, void *ppData = nullptr);
+  int remove(const std::string &id, int *pKey = nullptr, void **ppData = nullptr);
 
   // gets the key of a given node from the heap
   // if id doesn't exist bool is set to false and the function returns -1
