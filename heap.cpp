@@ -148,11 +148,12 @@ int heap::getKey(const string& id, bool * found){
      
 }
 
-void heap::setPointer(const string& id, void * pv){
+int heap::setPointer(const string& id, void * pv){
     bool found = false; 
     heapItem* item = (heapItem*)this->hashmap.getPointer(id,&found);
-    if(!found) return;
+    if(!found) return 1;
     item->pv = pv; 
+    return 0; 
 }
 
 void * heap::getPointer(const string& id, bool * found){

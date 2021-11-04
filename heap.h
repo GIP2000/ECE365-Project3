@@ -74,8 +74,18 @@ class heap{
   // otherwise it returns the key value
   int getKey(const std::string& id, bool* found); 
 
-  void setPointer(const std::string& id, void* pv); 
 
+  // Sets the pointer value of the heap's pv with the given id
+  // Retruns:
+  //    0: on completion  
+  //    1: when id is not found 
+  int setPointer(const std::string& id, void* pv); 
+
+  // Retruns:
+  //        0: if completed
+  //        1: if not found 
+  // if found(bool*) is supplied then it will be set to true if the value is found 
+  // otherwise it will be set to false
   void* getPointer(const std::string& id, bool* found = nullptr); 
   
   private:

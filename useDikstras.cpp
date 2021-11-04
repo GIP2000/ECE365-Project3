@@ -8,22 +8,12 @@
 
 using namespace std;
 
-class DijkstraHelper {
-    public:
-        DijkstraHelper(graph::vertex* self = nullptr,graph::vertex* path = nullptr, int weight = INT_MAX){
-            this -> self = self;
-            this -> path = path;
-            this -> weight = weight; 
-        }
-        graph::vertex* self = {nullptr};
-        graph::vertex* path = {nullptr};
-        int weight = {INT_MAX}; 
-};
-
-
-graph generateGraph(const string& filename){
+// Reads the input file and generates a graph (of type graphWithDijkstras) with the given vertecies and edges
+// file content will be a new line sep file of values tokenized by: 
+// {startnode} {endNode} {weight}
+graphWithDijkstras generateGraph(const string& filename){
     ifstream inputfile(filename); 
-    graph g; 
+    graphWithDijkstras g; 
     if(inputfile.is_open()){
         string line; 
         while(getline(inputfile, line)){
@@ -59,73 +49,43 @@ graph generateGraph(const string& filename){
     return g; 
 }
 
-hashTable Dijkstra(graph& g, const string& start){
-    heap dheap(g.getSize());
-    hashTable ktable(g.getSize()); 
-    for(auto& v: g.verts){
-        DijkstraHelper* dh = new DijkstraHelper(&v);
-        dheap.insert(v.name,v.name == start ? 0 : INT_MAX,dh);
-    }
-    
-    string vName;
-    int dv;
-    DijkstraHelper* dhp;
-    while(dheap.deleteMin(&vName,&dv,(void**)&dhp) != 1){
-        dhp->weight = dv; 
-        ktable.insert(vName,dhp); 
-        for(auto e: dhp->self->edges){
-            int cvw = get<1>(e);
-            graph::vertex* w = get<0>(e); 
-            bool found;  
-            int dw = dheap.getKey(w->name,&found);
-            if(!found){
-                DijkstraHelper* tdhp = (DijkstraHelper*)ktable.getPointer(w->name,&found); 
-                if(!found) {
-                    cerr << "Unreachable\n";
-                    exit(-1); 
-                }
-                dw = tdhp->weight; 
-            }
-            if(dv + cvw < dw){
-                dheap.setKey(w->name,dv + cvw);
-                DijkstraHelper * updatedDHP = new DijkstraHelper(w,dhp->self); 
-                dheap.setPointer(w->name,updatedDHP); 
-            }
-        }
 
-    }
-    return ktable; 
-    
-    
-}
-
+// Reccursive function that creates the string for the path from Vcurrent -> Vdestination
+// start is the name of the starting vertex (where Dijkstra's ran in refrence to). doesn't change in reccursive routine
+// current is the name of the current vertex in the path. This changes based on how far we transversed the path
+// kh is a hashtable that represents the results of Dijkstra's algorthim its value is a graphWithDijkstras::NodeInfo*
 string getPath(const string& start, const string& current, hashTable& kh){
     bool found; 
-    DijkstraHelper* dh = (DijkstraHelper*)kh.getPointer(current,&found); 
+    graphWithDijkstras::NodeInfo* dh = (graphWithDijkstras::NodeInfo*)kh.getPointer(current,&found); 
     if(!found){
         cerr << "Unreachable \n";
         exit(-1);
     }
-    string pname = dh->path == nullptr ? start : dh->path->name;
+    string pname = dh->path == "" ? start : dh->path;
     
     if(current == start) return "[" + start;
     return getPath(start,pname,kh) + ", " + current; 
 }
 
+
+// Writes the output file containing the min distance between vertecies from a start vertex
+// format is {vName}: {weight} [{vName, Va, ...,Vstart}]
+// takes a string filename to write to
+// a string startNode which is the start vertex
+// a hashtable kh which is the hashtable outputed by Dijkstra's algorthim
 void writeToOutput(const string& filename, const string& startNode, graph& g, hashTable& kh){
     ofstream outstream(filename);
-    for(auto& v: g.verts){
+    for(auto& v: g.getNames()){
         bool found; 
-        // int distance = kh.getKey(v.name,&found);
-        DijkstraHelper* dhp = (DijkstraHelper*)kh.getPointer(v.name,&found); 
+        graphWithDijkstras::NodeInfo* dhp = (graphWithDijkstras::NodeInfo*)kh.getPointer(v,&found); 
         if(!found){
             cerr << "Unreachable \n";
             exit(-1);
         }
         int distance = dhp->weight; 
 
-        string fs = getPath(startNode,v.name,kh) + "]"; 
-        outstream << v.name << ": " << distance << " " << fs << "\n"; 
+        string fs = getPath(startNode,v,kh) + "]"; 
+        outstream << v << ": " << distance << " " << fs << "\n"; 
     }
     outstream.close(); 
 }
@@ -136,16 +96,14 @@ int main(){
     cout << "Enter name of graph file: "; 
     string graphFile;
     cin >> graphFile;
-    graph g = generateGraph(graphFile);
+    graphWithDijkstras g = generateGraph(graphFile);
     cout << "Enter name of starting vertex: "; 
     string startNode; 
     cin >> startNode; 
 
     // Apply Dijkstra's algorithm
     auto start = chrono::_V2::steady_clock::now();
-    hashTable ktable = Dijkstra(g,startNode); 
-    DijkstraHelper* dhp = (DijkstraHelper*)ktable.getPointer("v3"); 
-    cout << "self: "<< dhp->self->name << " path: " << dhp->path->name << " d: " << dhp->weight << "\n"; 
+    hashTable ktable = g.Dijkstra(startNode); 
     auto end = chrono::_V2::steady_clock::now();
     chrono::duration<double> duration = end-start; 
     cout << "Total time (in seconds) to apply Dijkstra's algorithm: " << duration.count() << endl;
