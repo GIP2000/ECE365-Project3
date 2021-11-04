@@ -83,7 +83,10 @@ void writeToOutput(const string& filename, const string& startNode, graph& g, ha
             exit(-1);
         }
         int distance = dhp->weight; 
-
+        if(distance < 0 || distance == INT_MAX){
+            outstream << v << ": " << "NO PATH" << "\n";
+            continue;
+        }
         string fs = getPath(startNode,v,kh) + "]"; 
         outstream << v << ": " << distance << " " << fs << "\n"; 
     }
