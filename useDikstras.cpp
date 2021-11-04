@@ -61,26 +61,24 @@ graph generateGraph(const string& filename){
 
 hashTable Dijkstra(graph& g, const string& start){
     heap dheap(g.getSize());
-    // heap kheap(g.getSize());
     hashTable ktable(g.getSize()); 
     for(auto& v: g.verts){
         DijkstraHelper* dh = new DijkstraHelper(&v);
         dheap.insert(v.name,v.name == start ? 0 : INT_MAX,dh);
     }
-    string name;
+    
+    string vName;
     int dv;
     DijkstraHelper* dhp;
-    while(dheap.deleteMin(&name,&dv,(void**)&dhp) != 1){
-        // kheap.insert(name,dv,dhp);
+    while(dheap.deleteMin(&vName,&dv,(void**)&dhp) != 1){
         dhp->weight = dv; 
-        ktable.insert(name,dhp); 
+        ktable.insert(vName,dhp); 
         for(auto e: dhp->self->edges){
             int cvw = get<1>(e);
             graph::vertex* w = get<0>(e); 
             bool found;  
             int dw = dheap.getKey(w->name,&found);
             if(!found){
-                // dw = kheap.getKey(w->name,&found);
                 DijkstraHelper* tdhp = (DijkstraHelper*)ktable.getPointer(w->name,&found); 
                 if(!found) {
                     cerr << "Unreachable\n";
@@ -146,6 +144,8 @@ int main(){
     // Apply Dijkstra's algorithm
     auto start = chrono::_V2::steady_clock::now();
     hashTable ktable = Dijkstra(g,startNode); 
+    DijkstraHelper* dhp = (DijkstraHelper*)ktable.getPointer("v3"); 
+    cout << "self: "<< dhp->self->name << " path: " << dhp->path->name << " d: " << dhp->weight << "\n"; 
     auto end = chrono::_V2::steady_clock::now();
     chrono::duration<double> duration = end-start; 
     cout << "Total time (in seconds) to apply Dijkstra's algorithm: " << duration.count() << endl;

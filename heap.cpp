@@ -47,6 +47,7 @@ int heap::setKey(const std::string &id, int key){
                 this->data[i].key = key;  
                 this->data[i].index = i; 
                 this->data[i].pv = pv; 
+                this->hashmap.setPointer(data[i].id,&data[i]); 
                 return 0;
             case 1:
                 this->data[i] = data[i/2];

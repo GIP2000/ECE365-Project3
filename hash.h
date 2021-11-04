@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream> 
 
 class hashTable {
 
@@ -81,6 +82,8 @@ class hashTable {
   // Return a prime number at least as large as size.
   // Uses a precomputed sequence of selected prime numbers.
   static unsigned int getPrime(int size);
+
+  
 };
 
 #endif //_HASH_H
