@@ -1,10 +1,10 @@
-all: hash.o heap.o graph.o useDikstras.out
+all: hash.o heap.o graph.o useDijkstras.out
 
-useDikstras.out: useDikstras.o heap.o hash.o graph.o
-	g++ -o useDikstras.out useDikstras.o heap.o hash.o graph.o
+useDijkstras.out: useDijkstras.o heap.o hash.o graph.o
+	g++ -o useDijkstras.out useDijkstras.o heap.o hash.o graph.o
 
-useDikstras.o: useDikstras.cpp heap.h hash.h heap.cpp hash.cpp graph.o
-	g++ -c useDikstras.cpp
+useDijkstras.o: useDijkstras.cpp heap.h hash.h heap.cpp hash.cpp graph.o
+	g++ -c useDijkstras.cpp
 
 graph.o: hash.cpp hash.h heap.h heap.cpp
 	g++ -c graph.cpp
@@ -16,7 +16,7 @@ hash.o: hash.cpp hash.h
 	g++ -c hash.cpp
 
 debug:
-	g++ -g -o useDikstras.out useDikstras.cpp hash.cpp heap.cpp graph.cpp
+	g++ -g -o useDijkstras.out useDijkstras.cpp hash.cpp heap.cpp graph.cpp
 
 clean:
 	rm -f *.out *.o *.stackdump *~
