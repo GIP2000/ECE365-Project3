@@ -20,6 +20,16 @@ class NodeInfo {
         int weight = {INT_MAX}; 
 };
 
+class Pair {
+    public:
+        Pair(void * self = nullptr, void * path = nullptr){
+            this -> self = self;
+            this -> path = path;
+        }
+        void * self; 
+        void * path; 
+};
+
 
 // Returns the start node as a string if the start node is not in the vertex list then retry
 string getStartNode(graph& g){
@@ -44,40 +54,34 @@ hashTable Dijkstra(graph &g, const string& start){
     heap dheap(g.getSize());
     hashTable ktable(g.getSize()); 
     for(auto& v: g){
-        graph::Pair* pair = new graph::Pair(&v); 
+        Pair* pair = new Pair(&v); 
         dheap.insert(v.getName(),v.getName() == start ? 0 : INT_MAX,pair);
     }
 
     string vName;
     int dv;
-    graph::Pair * pair; 
+    Pair * pair; 
     while(dheap.deleteMin(&vName,&dv,(void**)&pair) != 1){
         // Add to the known set 
-        NodeInfo* ni = new NodeInfo(vName,pair->path == nullptr ? vName : pair->path->getName(),dv); 
+        NodeInfo* ni = new NodeInfo(vName,pair->path == nullptr ? vName : graph::vertexCast(pair->path)->getName(),dv); 
         ktable.insert(vName,ni); 
 
         // for every edge v->w
-        for(auto& e: *(pair->self)){
+        for(auto& e: *graph::vertexCast(pair->self)){
             int cvw = get<1>(e);
             auto* w = get<0>(e); 
             bool found;  
             int dw = dheap.getKey(w->getName(),&found);
-            if(!found){
-                NodeInfo* ni = (NodeInfo*)ktable.getPointer(w->getName(),&found); 
-                if(!found) {
-                    cerr << "Unreachable\n";
-                    exit(-1); 
-                }
-                dw = ni->weight; 
-            }
+            if(!found) continue;
 
             // if new distance is smaller than current distance 
             if(dv + cvw < dw){
                 dheap.setKey(w->getName(),dv + cvw);
-                graph::Pair* wp = (graph::Pair*)dheap.getPointer(w->getName());
+                Pair* wp = (Pair*)dheap.getPointer(w->getName());
+                found = false;
                 wp->path = pair->self;  
             }
-        }
+        } 
         delete pair; 
     }
     return ktable;
@@ -166,7 +170,6 @@ int main(){
 
     // Apply Dijkstra's algorithm
     auto start = chrono::_V2::steady_clock::now();
-    // hashTable ktable = g.Dijkstra(startNode); 
     hashTable ktable = Dijkstra(g,startNode);
     auto end = chrono::_V2::steady_clock::now();
     chrono::duration<double> duration = end-start; 

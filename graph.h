@@ -59,12 +59,8 @@ class graph {
         std::list<vertex>::iterator end() {return verts.end();}
 
 
-        class Pair{
-            public:
-                Pair(vertex* self = nullptr, vertex* path = nullptr);
-                vertex* self; 
-                vertex* path; 
-        };
+        // Returns a vertex * from a casted void * ptr
+        static vertex* vertexCast(void * ptr){return (vertex*)ptr;}
 };
 
 #endif

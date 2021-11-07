@@ -11,10 +11,10 @@ using namespace std;
 graph::vertex::vertex(const string& name){
     this->name = name; 
 }
-graph::Pair::Pair(vertex* self, vertex* path){
-    this->self = self; 
-    this->path = path; 
-}
+// graph::Pair::Pair(vertex* self, vertex* path){
+//     this->self = self; 
+//     this->path = path; 
+// }
 
 bool graph::contains(const std::string& node){
     return this->hashmap.contains(node);
