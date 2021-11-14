@@ -4,8 +4,6 @@
 #include <string>
 #include <tuple>
 
-#include <iostream> // for debugging
-
 using namespace std;
 
 graph::vertex::vertex(const string& name){
